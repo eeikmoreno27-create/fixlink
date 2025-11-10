@@ -1,7 +1,7 @@
 // scripts/client.js - vista cliente con chat en tiempo real
 import { db } from '../firebase.js';
 import {
-  doc, onSnapshot, collection, addDoc, query, orderBy
+  doc, onSnapshot, collection, addDoc, query, orderBy, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js';
 
 function qs(name){ return new URLSearchParams(window.location.search).get(name); }
@@ -60,6 +60,12 @@ chatForm.onsubmit = async (e)=>{
   const name = senderName.value.trim() || 'Cliente';
   const text = messageText.value.trim();
   if (!text) return;
-  await addDoc(collection(db, 'tickets', ticketId, 'messages'), { sender: name, text, createdAt: new Date().toISOString() });
+
+  await addDoc(collection(db, 'tickets', ticketId, 'messages'), {
+    sender: name,
+    text,
+    createdAt: serverTimestamp()  // ← tiempo real de Firebase
+  });
+
   messageText.value = '';
 };
