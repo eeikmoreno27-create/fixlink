@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FixLink - Panel técnico</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap dark">
+    <header class="top">
+      <div>
+        <h1>FixLink</h1>
+        <p class="muted">Panel técnico — administra reparaciones y responde mensajes</p>
+      </div>
+      <div class="right">
+        <input id="adminCodeInput" placeholder="Código técnico" />
+        <button id="btnLogin">Entrar</button>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <aside class="card small" id="createCard">
+        <h2>Crear / Editar ticket</h2>
+        <form id="ticketForm">
+          <input id="categoria" placeholder="Categoría (Computadora, Celular, Electrónica...)" />
+          <input id="cliente" placeholder="Nombre del cliente" required />
+          <input id="producto" placeholder="Producto (ej: Laptop Dell 3450)" required />
+          <input id="marca" placeholder="Marca / Modelo" />
+          <input id="serie" placeholder="Número de serie / IMEI" />
+          <textarea id="observaciones" placeholder="Observaciones / parte dañada"></textarea>
+          <input id="precio" placeholder="Precio estimado" />
+          <label>Prioridad</label>
+          <select id="prioridad"><option>Normal</option><option>Urgente</option><option>Alta</option></select>
+          <label>Estado</label>
+          <select id="status">
+            <option>En espera</option>
+            <option>En revisión</option>
+            <option>Detenido</option>
+            <option>Finalizado</option>
+            <option>Listo para recoger</option>
+          </select>
+
+          <input type="file" id="images" accept="image/*" multiple />
+          <div class="note">Máx 6 imágenes. Se almacenan en Firebase Storage.</div>
+          <input id="motivo" placeholder="Motivo de detención (breve)" />
+
+          <div class="actions">
+            <button type="submit">Guardar ticket</button>
+            <button type="button" id="btnClear">Limpiar</button>
+          </div>
+        </form>
+        <p class="note">Al guardar, se generará un enlace único <code>client.html?id=&lt;ticketId&gt;</code></p>
+      </aside>
+
+      <section class="card" id="ticketsCard">
+        <div class="header-row">
+          <h2>Tickets</h2>
+          <div>
+            <select id="filterStatus"><option value="all">Todos</option><option value="En espera">En espera</option><option value="En revisión">En revisión</option><option value="Detenido">Detenido</option><option value="Finalizado">Finalizado</option><option value="Listo para recoger">Listo para recoger</option></select>
+            <button id="btnDeleteAll">Borrar todos</button>
+          </div>
+        </div>
+        <div id="ticketsList">Cargando tickets...</div>
+      </section>
+
+      <aside class="card small" id="detailCard">
+        <h2>Detalle / Chat</h2>
+        <div id="detailArea">Selecciona un ticket para ver</div>
+      </aside>
+    </main>
+
+    <footer class="foot muted">FixLink • Almacenamiento en Firebase Storage • Eliminación automática 7 días tras finalizado</footer>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="scripts/admin.js"></script>
+</body>
+</html>

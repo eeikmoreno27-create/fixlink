@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FixLink - Estado de reparación</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>FixLink</h1>
+        <p class="muted">Estado de reparación</p>
+      </div>
+    </header>
+
+    <main class="client-main">
+      <section class="card client-card">
+        <div id="ticketView">Cargando...</div>
+      </section>
+
+      <section class="card client-card">
+        <h3>Mensajes con el técnico</h3>
+        <div id="chat" class="chat-box">Cargando chat...</div>
+        <form id="chatForm" class="chat-form">
+          <input id="senderName" placeholder="Tu nombre" required />
+          <input id="messageText" placeholder="Escribe un mensaje..." required />
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="foot muted">Muestra este enlace a tu técnico para seguimiento.</footer>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="scripts/client.js"></script>
+</body>
+</html>
