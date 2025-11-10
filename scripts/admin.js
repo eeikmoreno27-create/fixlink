@@ -1,4 +1,4 @@
-// scripts/admin.js - admin con tickets y chat en tiempo real
+// scripts/admin.js - Panel técnico FixLink funcional
 import { db, storage } from '../firebase.js';
 import { 
   collection, doc, setDoc, updateDoc, onSnapshot, query, orderBy, getDoc, getDocs, deleteDoc, addDoc, serverTimestamp 
@@ -6,6 +6,7 @@ import {
 import { ref as sRef, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/12.5.0/firebase-storage.js';
 import { ADMIN_CODE } from '../firebase.js';
 
+// Elementos del DOM
 const adminCodeInput = document.getElementById('adminCodeInput');
 const btnLogin = document.getElementById('btnLogin');
 const ticketForm = document.getElementById('ticketForm');
@@ -16,6 +17,12 @@ const btnDeleteAll = document.getElementById('btnDeleteAll');
 let ticketsUnsub = null;
 let messagesUnsub = null;
 
+// Función escapeHTML
+function escapeHtml(s=''){ 
+  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); 
+}
+
+// LOGIN
 btnLogin.onclick = () => {
   if(adminCodeInput.value.trim()===ADMIN_CODE){
     adminCodeInput.disabled = true;
@@ -24,6 +31,7 @@ btnLogin.onclick = () => {
   } else alert('Código incorrecto');
 };
 
+// CREAR TICKET
 ticketForm.onsubmit = async e => {
   e.preventDefault();
   if(!adminCodeInput.disabled) return alert('Acceso denegado');
@@ -43,28 +51,32 @@ ticketForm.onsubmit = async e => {
     createdAt: serverTimestamp()
   };
 
+  // Crear ticket vacío primero
   const docRef = doc(collection(db,'tickets'));
   await setDoc(docRef, data);
 
-  // Subir imágenes
+  // Subir imágenes si hay
   const files = Array.from(document.getElementById('images').files).slice(0,6);
-  const uploaded = [];
-  for(const f of files){
-    const path = `tickets/${docRef.id}/${Date.now()}_${f.name}`;
-    const sRefFile = sRef(storage, path);
-    await uploadBytes(sRefFile, f);
-    const url = await getDownloadURL(sRefFile);
-    uploaded.push({url,path});
+  if(files.length>0){
+    const uploaded = [];
+    for(const f of files){
+      const path = `tickets/${docRef.id}/${Date.now()}_${f.name}`;
+      const sRefFile = sRef(storage, path);
+      await uploadBytes(sRefFile, f);
+      const url = await getDownloadURL(sRefFile);
+      uploaded.push({url,path});
+    }
+    if(uploaded.length) await updateDoc(docRef, { images: uploaded });
   }
-  if(uploaded.length) await updateDoc(docRef, { images: uploaded });
 
+  // Copiar link al portapapeles
   const link = window.location.origin + window.location.pathname.replace('admin.html','client.html') + '?id=' + docRef.id;
   navigator.clipboard?.writeText(link);
   alert('Ticket creado. Link copiado:\n'+link);
   ticketForm.reset();
 };
 
-// Escuchar tickets
+// ESCUCHAR TICKETS EN TIEMPO REAL
 function startListeningTickets(){
   const q = query(collection(db,'tickets'), orderBy('createdAt','desc'));
   ticketsUnsub = onSnapshot(q, snap=>{
@@ -74,7 +86,7 @@ function startListeningTickets(){
       const el = document.createElement('div');
       el.className='tickets-item';
       const img = t.images?.[0]?.url ? `<img src="${t.images[0].url}" style="width:72px;height:72px;">` : 'No img';
-      el.innerHTML = `<div><strong>${t.producto}</strong> - ${t.cliente} - ${t.status}</div>
+      el.innerHTML = `<div><strong>${escapeHtml(t.producto)}</strong> - ${escapeHtml(t.cliente)} - ${escapeHtml(t.status)}</div>
                       <button data-id="${t.id}" class="btn-open">Abrir</button>`;
       ticketsList.appendChild(el);
     });
@@ -85,16 +97,18 @@ function startListeningTickets(){
   });
 }
 
-// Abrir detalle ticket
+// ABRIR DETALLE TICKET
 async function openDetail(ticketId){
   const docRef = doc(db,'tickets',ticketId);
+
+  // Escuchar ticket en tiempo real
   onSnapshot(docRef, snap=>{
     if(!snap.exists()){ detailArea.innerHTML='Ticket no encontrado'; return; }
     const t = {id:snap.id,...snap.data()};
     renderDetail(t);
   });
 
-  // Chat admin
+  // Escuchar chat en tiempo real
   if(messagesUnsub) messagesUnsub();
   const msgsCol = collection(db,'tickets',ticketId,'messages');
   const q = query(msgsCol,orderBy('createdAt','asc'));
@@ -104,11 +118,12 @@ async function openDetail(ticketId){
   });
 }
 
+// RENDERIZAR DETALLE
 function renderDetail(t){
   const imgs = t.images?.map(i=>`<img src="${i.url}" style="width:100px;margin-right:5px">`).join('')||'';
   detailArea.innerHTML = `
-    <div><strong>${t.producto}</strong></div>
-    <div>${t.cliente}</div>
+    <div><strong>${escapeHtml(t.producto)}</strong></div>
+    <div>${escapeHtml(t.cliente)}</div>
     <div>${imgs}</div>
     <select id="detailStatus">
       <option ${t.status==='En espera'?'selected':''}>En espera</option>
@@ -117,7 +132,7 @@ function renderDetail(t){
       <option ${t.status==='Finalizado'?'selected':''}>Finalizado</option>
       <option ${t.status==='Listo para recoger'?'selected':''}>Listo para recoger</option>
     </select>
-    <input id="detailMotivo" value="${t.motivo||''}" placeholder="Motivo"/>
+    <input id="detailMotivo" value="${escapeHtml(t.motivo||'')}" placeholder="Motivo"/>
     <button id="btnSaveDetail">Guardar</button>
     <div><strong>Chat</strong><div id="messagesArea"></div>
       <input id="techMessage" placeholder="Escribe mensaje"/>
@@ -125,6 +140,7 @@ function renderDetail(t){
     </div>
   `;
 
+  // Guardar cambios
   document.getElementById('btnSaveDetail').onclick=async()=>{
     const status=document.getElementById('detailStatus').value;
     const motivo=document.getElementById('detailMotivo').value.trim();
@@ -132,6 +148,7 @@ function renderDetail(t){
     alert('Guardado');
   };
 
+  // Enviar mensaje técnico
   document.getElementById('btnSendTech').onclick=async()=>{
     const text=document.getElementById('techMessage').value.trim();
     if(!text)return;
@@ -140,9 +157,33 @@ function renderDetail(t){
   };
 }
 
-// Renderizar mensajes en admin
+// RENDERIZAR CHAT
 function renderMessages(msgs){
   const area=document.getElementById('messagesArea');
   if(!area) return;
-  area.innerHTML = msgs.map(m=>`<div><strong>${m.sender}:</strong> ${m.text}</div>`).join('');
+  area.innerHTML = msgs.map(m=>`<div><strong>${escapeHtml(m.sender)}:</strong> ${escapeHtml(m.text)}</div>`).join('');
+}
+
+// ELIMINAR TODOS LOS TICKETS
+btnDeleteAll.onclick=async()=>{
+  if(!confirm('Borrar TODOS los tickets?')) return;
+  const snaps=await getDocs(collection(db,'tickets'));
+  for(const d of snaps.docs){
+    await deleteTicketAndStorage(d.id);
+  }
+  alert('Todos los tickets borrados');
+};
+
+// ELIMINAR TICKET + STORAGE
+async function deleteTicketAndStorage(ticketId){
+  const docRef = doc(db,'tickets',ticketId);
+  const snap = await getDoc(docRef);
+  if(!snap.exists()) return;
+  const data = snap.data();
+  for(const i of data.images||[]){
+    try{ await deleteObject(sRef(storage,i.path)); }catch(e){console.warn('No se pudo borrar',i.path);}
+  }
+  const msgsSnap = await getDocs(collection(db,'tickets',ticketId,'messages'));
+  for(const m of msgsSnap.docs) await deleteDoc(doc(db,'tickets',ticketId,'messages',m.id));
+  await deleteDoc(doc(db,'tickets',ticketId));
 }
