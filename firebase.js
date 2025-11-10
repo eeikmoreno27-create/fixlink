@@ -1,4 +1,4 @@
-// firebase.js - Configuración Firebase
+// firebase.jS - Configuración Firebase
 export const ADMIN_CODE = 'erik2025';
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
