@@ -1,25 +1,20 @@
-FixLink - Paquete Profesional (lista para GitHub Pages)
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-Contenido:
-- index.html (redirige a admin.html)
-- admin.html (panel técnico)
-- client.html (vista del cliente)
-- style.css (diseño oscuro, responsive)
-- firebase.js (config con Firestore + Storage)  <-- revisa ADMIN_CODE si quieres cambiarlo
-- scripts/admin.js  (panel técnico: crear, upload a Storage, chat, limpieza 7 días)
-- scripts/client.js (vista cliente: ver ticket y chat)
-- assets/ (carpeta para logos o archivos adicionales)
+# Run and deploy your AI Studio app
 
-Pasos para publicar:
-1) Descomprime esta carpeta y sube todos los archivos a la raíz de tu repo en GitHub.
-2) En Firebase Console asegúrate de tener Firestore y Storage habilitados.
-3) En Firebase Console > Firestore, crea la colección 'tickets' (no es obligatorio crear docs manualmente).
-4) En Firebase Console > Storage, configura reglas (modo prueba para pruebas).
-5) En GitHub: Settings -> Pages -> Branch: main, Folder: / (root) -> Save.
-6) Abre https://TUUSUARIO.github.io/TU_REPO/admin.html, introduce ADMIN_CODE ('erik2025') y prueba crear tickets.
+This contains everything you need to run your app locally.
 
-Notas de seguridad:
-- Actualmente el código usa modo prueba para Firestore/Storage. No dejar en modo prueba indefinidamente en producción.
-- Cambia ADMIN_CODE en firebase.js por una contraseña segura antes de subir.
-- La limpieza automática se ejecuta al iniciar sesión en el panel técnico y elimina tickets Finalizado con más de 7 días (incluye borrado de imágenes del Storage).
+View your app in AI Studio: https://ai.studio/apps/temp/1
 
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

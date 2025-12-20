@@ -1,0 +1,8 @@
+
+{
+  "name": "DrumMaster Pro - Afinador de Batería Inteligente",
+  "description": "Una aplicación profesional para afinar baterías paso a paso utilizando análisis de audio en tiempo real e inteligencia artificial para guiar al músico en cada ajuste de los tensores.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
