@@ -150,7 +150,7 @@ const Dashboard: React.FC<Props> = ({ prefs, onNavigate }) => {
           <div className="glass p-10 rounded-[3.5rem] border-white/5 bg-blue-600/5 text-center">
              <Trophy className="w-12 h-12 text-yellow-500 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]" />
              <p className="text-slate-400 text-xs font-bold leading-relaxed mb-6 uppercase tracking-wider">Tu constancia es la llave del éxito internacional.</p>
-             <p className="text-[12px] font-black text-white uppercase tracking-[0.6em] italic">by ERIK ZAVALA</p>
+             <p className="text-[12px] font-black text-white uppercase tracking-[0.6em] italic">by ERIK ZAVALA BRANDON DURAN</p>
           </div>
         </div>
       </div>
